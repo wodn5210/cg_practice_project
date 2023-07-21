@@ -2,3 +2,7 @@ first_opengl_example/build/
 first_opengl_example/.vscode/
 first_opengl_example/.DS_Store
 .DS_Store
+opengl_example/build/
+opengl_example/.vscode/
+opengl_example/.DS_Store
+
