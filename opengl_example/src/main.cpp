@@ -1,5 +1,4 @@
-#include "common.h"
-#include "shader.h"
+#include "context.h"
 
 
 // 윈도우 크기가 변경될 때마다 호출
@@ -23,10 +22,6 @@ void OnKeyEvent(GLFWwindow* window,
     }
 }
 
-void Render() {
-    glClearColor(0.1f, 0.2f, 0.3f, 0.0f);       // 화면 무슨색으로 지울까? -> 한번만 설정해도 된다.
-    glClear(GL_COLOR_BUFFER_BIT);               // 실제 화면 지우기
-}
 
 int main()
 {    
@@ -67,32 +62,37 @@ int main()
 
     // 여기까지 초기화 끝.
     // 이 이후부터 opengl function 본격적으로 사용 가능
-
-    auto vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
-    auto fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
-    SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
-    SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
-
+    auto context = Context::Create();
+    if (!context) {
+        SPDLOG_ERROR("failed to create context");
+        glfwTerminate();
+        return -1;
+    }
 
     // 이벤트 함수 등록
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);       // 첫 윈도우 생성직후에는 이벤트 발생 안하므로 강제로 호출 (위치는 중요 X)
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
 
+
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();   // 이벤트 수집 ex) 창움직이기, 마우스, 키보드 ...
-        // 화면크기 변경 감지된거 확인하고 OnFramebufferSizeChange함수 불림
-
         // Poll 전에하든 후에하는 상관없음
-        Render();   
-        
+        context->Render();
+
         // 화면에 그림그릴때 버퍼 2개를 준비
         // 하나로만하면 그림그려지는 과정도 보이므로
         // 그림 다 완성된거 보여주고, 나머지에 그림
         glfwSwapBuffers(window); //=> double buffering
+
+        glfwPollEvents();   // 이벤트 수집 ex) 창움직이기, 마우스, 키보드 ...
+        // 화면크기 변경 감지된거 확인하고 OnFramebufferSizeChange함수 불림
     }
+
+    // context 의 메모리 모두 해제
+    // context = nullptr;
+    context.reset();    
 
     glfwTerminate();
     return 0;
