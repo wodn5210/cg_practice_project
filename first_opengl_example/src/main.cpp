@@ -40,8 +40,9 @@ int main()
         return -1;
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);              //macos 에서는 3.3으로 해도 4.1로 변경됨
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);              //macos 에서는 3.3으로 해도 4.1로 변경됨
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);              //내 window os컴퓨터에서는 4.1 로 설정시 window 생성 fail 발생
+    
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);        //macos 에러 추가
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 

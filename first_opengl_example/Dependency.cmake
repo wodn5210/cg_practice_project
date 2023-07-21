@@ -21,9 +21,11 @@ ExternalProject_Add(                                                # git 에서
 
 # Dependency 리스트 및 라이브러리 파일 리스트 추가
 set(DEP_LIST ${DEP_LIST} dep_spdlog)
-set(DEP_LIBS ${DEP_LIBS} spdlog)
-#set(DEP_LIBS ${DEP_LIBS} spdlog$<$<CONFIG:Debug>:d>)           # 이거 안됨 ㅜ
-
+if(APPLE)
+    set(DEP_LIBS ${DEP_LIBS} spdlog)
+else()
+    set(DEP_LIBS ${DEP_LIBS} spdlog$<$<CONFIG:Debug>:d>)           # mac 에선 안됨
+endif()
 
 # # glfw
 ExternalProject_Add(
