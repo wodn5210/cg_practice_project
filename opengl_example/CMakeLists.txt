@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(PROJECT_NAME triangle_example)
+set(PROJECT_NAME texture_example)
 set(CMAKE_CXX_STANDARD 17)
 
-set(WINDOW_NAME "Triangle Example")
+set(WINDOW_NAME "Texture Example")
 set(WINDOW_WIDTH 960)
 set(WINDOW_HEIGHT 540)
 
@@ -17,7 +17,8 @@ add_executable(${PROJECT_NAME}
     src/program.cpp src/program.h   
     src/context.cpp src/context.h   
     src/buffer.cpp src/buffer.h     
-    src/vertex_layout.cpp src/vertex_layout.h          
+    src/vertex_layout.cpp src/vertex_layout.h   
+    src/image.cpp src/image.h              
     )
 
 include(dependency.cmake)

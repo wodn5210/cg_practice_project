@@ -60,3 +60,24 @@ ExternalProject_Add(
     )
 set(DEP_LIST ${DEP_LIST} dep_glad)
 set(DEP_LIBS ${DEP_LIBS} glad)
+
+
+# stb
+# single file library 이기때문에 lib 의존성 추가할 필요는 없음 (빌드 필요 x)
+# single file -> .h 파일 하나로만 사용 가능
+ExternalProject_Add(
+    dep_stb
+    GIT_REPOSITORY "https://github.com/nothings/stb"
+    GIT_TAG "master"
+    GIT_SHALLOW 1
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CONFIGURE_COMMAND ""            # build 필요  X
+    BUILD_COMMAND ""                # build 필요  X
+    TEST_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy                            # ${CMAKE_COMMAND} == cmake 임. cmake 의 copy 명령어
+        ${PROJECT_BINARY_DIR}/dep_stb-prefix/src/dep_stb/stb_image.h    # 다운받아진 file 중 stb_image.h 만
+        ${DEP_INSTALL_DIR}/include/stb/stb_image.h                      # 우리 project 폴더에 복사한다
+    )
+set(DEP_LIST ${DEP_LIST} dep_stb)
+
