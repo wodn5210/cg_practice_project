@@ -4,6 +4,11 @@
 // 윈도우 크기가 변경될 때마다 호출
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
+    
+    
+    glfwGetFramebufferSize(window, &width, &height);    // 맥에서는 이상하게 화면크기조절시 framebuffer size 도 지정해야한다.
+    // 추가설명으로는 macOs 에서는 스크린 좌표와 픽셀이 1:1 매치가 아니여서 그렇단다
+
     glViewport(0, 0, width, height);    // 그림그릴 위치 및 화면크기 설정
 }
 
@@ -69,8 +74,8 @@ int main()
         return -1;
     }
 
-    // 맥에서는 이상하게 화면크기조절이 정상적으로 안되는거같음
-    //OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);       // 첫 윈도우 생성직후에는 이벤트 발생 안하므로 강제로 호출 (위치는 중요 X)
+    
+    OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);       // 첫 윈도우 생성직후에는 이벤트 발생 안하므로 강제로 호출 (위치는 중요 X)
     
     // 이벤트 함수 등록
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
