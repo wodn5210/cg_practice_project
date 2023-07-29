@@ -108,8 +108,8 @@ bool Context::Init() {
     glBindTexture(GL_TEXTURE_2D, m_texture2->Get());    // 1번 슬롯에는 2D Texture m_texture2 이다
 
     m_program->Use();
-    glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);      // 0번 텍스쳐 슬롯
-    glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);     // 1번 텍스쳐 슬롯 
+    m_program->SetUniform("tex", 0);
+    m_program->SetUniform("tex2", 1);
 
 /*
     이미지 상하반전 되어있는 이유?
@@ -125,9 +125,7 @@ bool Context::Init() {
     // 종횡비 4:3, 세로화각 45도의 원근 투영
     auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
     auto transform = projection * view * model;
-    auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");        // uniform location 얻어오기
-    // location, 몇개?(배열), transpose 여부, pointer
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));       // 값 넣기
+    m_program->SetUniform("transform", transform);
 
     return true;
 }
@@ -139,9 +137,14 @@ void Context::Render() {
     Depth Buffer 의 경우. 기본값이 1이며 0이면 가까운것이다.
     가까운 그림을 그린다.
     */    
-
-
     m_program->Use();
+    auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
+    auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    auto model = glm::rotate(glm::mat4(1.0f), glm::radians((float)glfwGetTime() * 120.0f), glm::vec3(1.0f, 0.5f, 0.0f));
+    auto transform = projection * view * model;
+    m_program->SetUniform("transform", transform);
+
+
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
