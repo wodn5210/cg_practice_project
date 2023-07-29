@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(WINDOW_NAME "Texture Example")
 set(WINDOW_WIDTH 960)
-set(WINDOW_HEIGHT 540)
+set(WINDOW_HEIGHT 960)
 
 
 project(${PROJECT_NAME})    # 본격적으로 프로젝트 세팅

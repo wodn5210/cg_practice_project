@@ -59,14 +59,35 @@ bool Context::Init() {
 
     glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
 
-    //auto image = Image::Load("./image/container.jpg"); 
-    auto image = Image::Create(512, 512);
-    image->SetCheckImage(16, 16);
+    auto image = Image::Load("./image/container.jpg"); 
     if (!image) 
         return false;
     SPDLOG_INFO("image: {}x{}, {} channels",
         image->GetWidth(), image->GetHeight(), image->GetChannelCount());
 	m_texture = Texture::CreateFromImage(image.get());
+
+	auto image2 = Image::Load("./image/awesomeface.png");
+    if (!image2) 
+        return false;
+    SPDLOG_INFO("image2: {}x{}, {} channels",
+        image2->GetWidth(), image2->GetHeight(), image2->GetChannelCount());    
+    m_texture2 = Texture::CreateFromImage(image2.get());
+
+    glActiveTexture(GL_TEXTURE0);                       // 사용할 텍스쳐 슬롯 번호 등록
+    glBindTexture(GL_TEXTURE_2D, m_texture->Get());     // 0번 슬롯에는 2D Texture Id m_texture 이다
+    glActiveTexture(GL_TEXTURE1);                       // 사용할 텍스쳐 슬롯 번호 1번으로 변경
+    glBindTexture(GL_TEXTURE_2D, m_texture2->Get());    // 1번 슬롯에는 2D Texture m_texture2 이다
+
+    m_program->Use();
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);      // 0번 텍스쳐 슬롯
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);     // 1번 텍스쳐 슬롯 
+
+/*
+    이미지 상하반전 되어있는 이유?
+
+    이미지는 좌상단이 0,0 인데, Opengl은 좌하단을 0,0 으로 생각함
+    이미지 로딩할때 상하반전 시켜보자
+*/    
 
     return true;
 }
