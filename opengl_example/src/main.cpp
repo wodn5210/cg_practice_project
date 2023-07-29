@@ -65,6 +65,9 @@ int main()
     auto glVersion = glGetString(GL_VERSION);
     SPDLOG_INFO("OpenGL context version: {}", (const char*)glVersion);  // (const char*) -> unsigned char* 형에 대한 {} 로그 지원이 없어진듯
 
+    glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
+    glEnable(GL_DEPTH_TEST);
+
     // 여기까지 초기화 끝.
     // 이 이후부터 opengl function 본격적으로 사용 가능
     auto context = Context::Create();
@@ -85,6 +88,7 @@ int main()
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);        
         // Poll 전에하든 후에하는 상관없음
         context->Render();
 

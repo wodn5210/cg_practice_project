@@ -86,9 +86,7 @@ bool Context::Init() {
     if (!m_program)
         return false;    SPDLOG_INFO("program id: {}", m_program->Get());
 
-    glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
-
-    auto image = Image::Load("./image/container.jpg"); 
+    auto image = Image::Load("./image/container.jpg");      // 이미지들은 항상 메모리에 들고있을 필요없다. texture 만들면 그만임.
     if (!image) 
         return false;
     SPDLOG_INFO("image: {}x{}, {} channels",
@@ -111,13 +109,7 @@ bool Context::Init() {
     m_program->SetUniform("tex", 0);
     m_program->SetUniform("tex2", 1);
 
-/*
-    이미지 상하반전 되어있는 이유?
-
-    이미지는 좌상단이 0,0 인데, Opengl은 좌하단을 0,0 으로 생각함
-    이미지 로딩할때 상하반전 시켜보자
-*/    
-
+    glUseProgram(0);
     return true;
 }
 
@@ -134,10 +126,9 @@ void Context::Render() {
         glm::vec3( 1.5f, 0.2f, -1.5f),
         glm::vec3(-1.3f, 1.0f, -1.5f),
     };    
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
 
     m_program->Use();
+
     auto projection = glm::perspective(glm::radians(45.0f), (float)640 / (float)480, 0.01f, 20.0f);
     auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
 
