@@ -1,4 +1,6 @@
 #include "context.h"
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 /*
     Context 의 전역변수는 선언하지 말자.
@@ -12,11 +14,21 @@ void OnCursorPos(GLFWwindow* window, double x, double y) {
 }
 
 void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
-  auto context = (Context*)glfwGetWindowUserPointer(window);
+  ImGui_ImplGlfw_MouseButtonCallback(window, button, action, modifier);
+  
+  auto context = (Context *)glfwGetWindowUserPointer(window);
   double x, y;
   glfwGetCursorPos(window, &x, &y);
   context->MouseButton(button, action, x, y);
   SPDLOG_INFO("OnMouse");
+}
+
+void OnCharEvent(GLFWwindow* window, unsigned int ch) {
+    ImGui_ImplGlfw_CharCallback(window, ch);
+}
+
+void OnScroll(GLFWwindow* window, double xoffset, double yoffset) {
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 }
 
 // 윈도우 크기가 변경될 때마다 호출
@@ -32,6 +44,9 @@ void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
 
 void OnKeyEvent(GLFWwindow* window,
     int key, int scancode, int action, int mods) {
+
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);   
+
     SPDLOG_INFO("key: {}, scancode: {}, action: {}, mods: {}{}{}",
         key, scancode,
         action == GLFW_PRESS ? "Pressed" :
@@ -83,6 +98,17 @@ int main()
     auto glVersion = glGetString(GL_VERSION);
     SPDLOG_INFO("OpenGL context version: {}", (const char*)glVersion);  // (const char*) -> unsigned char* 형에 대한 {} 로그 지원이 없어진듯
 
+
+    // IMgui 는 glContext 생성 이후에
+    auto imguiContext = ImGui::CreateContext();         // IMGUI 에서 제공하는 Context 생성
+    ImGui::SetCurrentContext(imguiContext);             // 해당 Context 를 현재 Context 로 설정
+    ImGui_ImplGlfw_InitForOpenGL(window, false);        // 두번째인자는 callback 사용할것이냐? 안함 -> 우린 직접한다
+    
+    // opengl3 버전에 대한 Init 을 위해 사용. shader, font, texture 등등
+    ImGui_ImplOpenGL3_Init();                           
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+    ImGui_ImplOpenGL3_CreateDeviceObjects();
+
     glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
     glEnable(GL_DEPTH_TEST);
 
@@ -105,31 +131,48 @@ int main()
     // 이벤트 함수 등록
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+    glfwSetCharCallback(window, OnCharEvent);
     glfwSetCursorPosCallback(window, OnCursorPos);
 	glfwSetMouseButtonCallback(window, OnMouseButton);
+    glfwSetScrollCallback(window, OnScroll);
+
 
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
 
+        glfwPollEvents();   // 이벤트 수집 ex) 창움직이기, 마우스, 키보드 ...
+        // 화면크기 변경 감지된거 확인하고 OnFramebufferSizeChange함수 불림
+
+        // Imgui는 매 프레임마다 gui 그리기때문에 새 Frame 인걸 알려준다.
+	    ImGui_ImplGlfw_NewFrame();  // display size setting
+        ImGui::NewFrame();
 
         // Poll 전에하든 후에하는 상관없음
         context->ProcessInput(window);
         context->Render();
+
+        // 우리가 그린 Scene 위에 gui 를 그릴것임.
+	    ImGui::Render();        // imgui ui 코드들 쫙 조합해서 그림그려야하는 정보들 list 형태로 생김
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // 여기서 그 list들을 실제로 그린다.
 
         // 화면에 그림그릴때 버퍼 2개를 준비
         // 하나로만하면 그림그려지는 과정도 보이므로
         // 그림 다 완성된거 보여주고, 나머지에 그림
         glfwSwapBuffers(window); //=> double buffering
 
-        glfwPollEvents();   // 이벤트 수집 ex) 창움직이기, 마우스, 키보드 ...
-        // 화면크기 변경 감지된거 확인하고 OnFramebufferSizeChange함수 불림
     }
 
     // context 의 메모리 모두 해제
     // context = nullptr;
-    context.reset();    
+    context.reset();
+
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_DestroyDeviceObjects();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext(imguiContext);
 
     glfwTerminate();
     return 0;

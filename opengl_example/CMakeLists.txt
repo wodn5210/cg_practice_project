@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(PROJECT_NAME transformation_example)
+set(PROJECT_NAME imgui_example)
 set(CMAKE_CXX_STANDARD 17)
 
-set(WINDOW_NAME "Transformation Example")
-set(WINDOW_WIDTH 960)
-set(WINDOW_HEIGHT 960)
+set(WINDOW_NAME "Imgui Example")
+set(WINDOW_WIDTH 600)
+set(WINDOW_HEIGHT 600)
 
 
 project(${PROJECT_NAME})    # 본격적으로 프로젝트 세팅
-#Project name 이라는 실행파일 생성할것인데, 뒤의 main.cpp 를 이용함
+
+# Project name 이라는 실행파일 생성할것인데, 뒤의 main.cpp 를 이용함
+# 원래 cpp 만 작성해도 상관없음. 그러나, h 파일도 추가해야 h파일 변경되었을떼 빌드 다시함
 add_executable(${PROJECT_NAME}
     src/main.cpp
     src/common.cpp src/common.h

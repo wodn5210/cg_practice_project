@@ -1,5 +1,6 @@
 #include "context.h"
 #include "image.h"
+#include <imgui.h>
 
 ContextUPtr Context::Create() {
     auto context = ContextUPtr(new Context());
@@ -114,6 +115,31 @@ bool Context::Init() {
 }
 
 void Context::Render() {
+    // Begin ~ End 는 항상 쌍으로 되어야한다. 이게 윈도우 띄우는 기본
+
+    if (ImGui::Begin("ui window"))  // 윈도우가 열려있으면
+    {
+        if (ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor))) //m_clearColor 색상 변경
+        {
+            // 그리고 실제 값의 변경이 있을때만 if 문 안으로 진입
+            // Clear Color 색 변경
+            glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
+        }
+        ImGui::Separator();
+        ImGui::DragFloat3("camera pos", glm::value_ptr(m_cameraPos), 0.01f);        // 맨끝에는 speed
+        ImGui::DragFloat("camera yaw", &m_cameraYaw, 0.5f);                         // 맨끝에는 speed
+        ImGui::DragFloat("camera pitch", &m_cameraPitch, 0.5f, -89.0f, 89.0f);      // 맨끝에는 speed, 값 제한
+        ImGui::Separator();
+        if (ImGui::Button("reset camera"))
+        {
+            // 버튼 눌리면 진입
+            m_cameraYaw = 0.0f;
+            m_cameraPitch = 0.0f;
+            m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        }
+    }
+    ImGui::End();
+
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f, 0.0f, 0.0f),
         glm::vec3( 2.0f, 5.0f, -15.0f),
