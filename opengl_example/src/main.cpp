@@ -1,15 +1,33 @@
 #include "context.h"
 
+/*
+    Context 의 전역변수는 선언하지 말자.
+    초기화와 지우는 위치를 정확히 알 수 없기때문에
+    User Pointer 를 사용할것
+    glfwSetWindowUserPointer(window, context.get());
+*/
+void OnCursorPos(GLFWwindow* window, double x, double y) {
+  auto context = (Context*)glfwGetWindowUserPointer(window);
+  context->MouseMove(x, y);
+}
+
+void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
+  auto context = (Context*)glfwGetWindowUserPointer(window);
+  double x, y;
+  glfwGetCursorPos(window, &x, &y);
+  context->MouseButton(button, action, x, y);
+  SPDLOG_INFO("OnMouse");
+}
 
 // 윈도우 크기가 변경될 때마다 호출
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
-    SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
-    
-    
     glfwGetFramebufferSize(window, &width, &height);    // 맥에서는 이상하게 화면크기조절시 framebuffer size 도 지정해야한다.
     // 추가설명으로는 macOs 에서는 스크린 좌표와 픽셀이 1:1 매치가 아니여서 그렇단다
 
-    glViewport(0, 0, width, height);    // 그림그릴 위치 및 화면크기 설정
+    SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
+    //auto context = (Context *)glfwGetWindowUserPointer(window); // C-type Casting
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));  // void -> Context* 로 아예 변경? 하는거라 reinterpret 사용해야한대
+    context->Reshape(width, height);    // 그림그릴 위치 및 화면크기 설정
 }
 
 void OnKeyEvent(GLFWwindow* window,
@@ -77,19 +95,27 @@ int main()
         return -1;
     }
 
+    // Context 전역 대신 사용
+    glfwSetWindowUserPointer(window, context.get());
+    // auto context = (Context*)glfwGetWindowUserPointer(window); 이렇게 사용
+
     
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);       // 첫 윈도우 생성직후에는 이벤트 발생 안하므로 강제로 호출 (위치는 중요 X)
     
     // 이벤트 함수 등록
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
-
+    glfwSetCursorPosCallback(window, OnCursorPos);
+	glfwSetMouseButtonCallback(window, OnMouseButton);
 
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);        
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
+
+
         // Poll 전에하든 후에하는 상관없음
+        context->ProcessInput(window);
         context->Render();
 
         // 화면에 그림그릴때 버퍼 2개를 준비
