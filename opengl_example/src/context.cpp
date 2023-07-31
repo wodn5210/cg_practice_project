@@ -110,6 +110,8 @@ bool Context::Init() {
     m_program->SetUniform("tex", 0);
     m_program->SetUniform("tex2", 1);
 
+
+    glBindVertexArray(0);
     glUseProgram(0);
     return true;
 }
@@ -154,6 +156,7 @@ void Context::Render() {
     };    
 
     m_program->Use();
+    m_vertexLayout->Bind();
 /*
  *  Open GL 은 열 우선방식으로, 이론상 나와있는 배열의 형태와 다르게 나타날 수 있다. 
  * 가령 행렬 A:translate 예를 보자
@@ -176,6 +179,9 @@ void Context::Render() {
         m_program->SetUniform("transform", transform);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
+
+    glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 void Context::ProcessInput(GLFWwindow* window) {
