@@ -44,5 +44,18 @@ void Program::SetUniform(const std::string& name, int value) const {
 
 void Program::SetUniform(const std::string& name, const glm::mat4& value) const {
     auto loc = glGetUniformLocation(m_program, name.c_str());
+
+    // 2번째 파라미터는 몇개냐? (배열일경우))
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
+}
+
+// program.cpp
+void Program::SetUniform(const std::string& name, float value) const {
+    auto loc = glGetUniformLocation(m_program, name.c_str());
+    glUniform1f(loc, value);
+}
+
+void Program::SetUniform(const std::string& name, const glm::vec3& value) const {
+    auto loc = glGetUniformLocation(m_program, name.c_str());
+    glUniform3fv(loc, 1, glm::value_ptr(value));
 }

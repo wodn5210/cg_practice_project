@@ -41,6 +41,11 @@ private:
     // clear color
     glm::vec4 m_clearColor{glm::vec4(0.1f, 0.2f, 0.3f, 0.0f)};
 
+    // light parameter
+    glm::vec3 m_lightColor{glm::vec3(1.0f, 1.0f, 1.0f)};
+    glm::vec3 m_objectColor{glm::vec3(1.0f, 0.5f, 0.0f)};
+    float m_ambientStrength{0.1f};
+
     int m_width {WINDOW_WIDTH};
     int m_height {WINDOW_HEIGHT};    
 };

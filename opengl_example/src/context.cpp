@@ -75,9 +75,8 @@ bool Context::Init() {
  
 	m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t) * 36);
 
-
-    ShaderPtr vertShader = Shader::CreateFromFile("./shader/texture.vs", GL_VERTEX_SHADER);
-    ShaderPtr fragShader = Shader::CreateFromFile("./shader/texture.fs", GL_FRAGMENT_SHADER);
+    ShaderPtr vertShader = Shader::CreateFromFile("./shader/lighting.vs", GL_VERTEX_SHADER);
+    ShaderPtr fragShader = Shader::CreateFromFile("./shader/lighting.fs", GL_FRAGMENT_SHADER);
     if (!vertShader || !fragShader)
         return false;
     SPDLOG_INFO("vertex shader id: {}", vertShader->Get());
@@ -139,6 +138,12 @@ void Context::Render() {
             m_cameraPitch = 0.0f;
             m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
         }
+        if (ImGui::CollapsingHeader("light"))   // collapsing: 접을 수 있다
+        {
+            ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
+            ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
+            ImGui::SliderFloat("ambient strength", &m_ambientStrength, 0.0f, 1.0f);
+        }
     }
     ImGui::End();
 
@@ -157,12 +162,16 @@ void Context::Render() {
 
     m_program->Use();
     m_vertexLayout->Bind();
-/*
- *  Open GL 은 열 우선방식으로, 이론상 나와있는 배열의 형태와 다르게 나타날 수 있다. 
- * 가령 행렬 A:translate 예를 보자
- * 강의에서는 A03, A13, A23 의 부분이 translate 부분이다.
- * 하지만 glm::translate 에서는 A30,A31,A32 가 translate 가 된다.
-*/
+    m_program->SetUniform("lightColor", m_lightColor);
+    m_program->SetUniform("objectColor", m_objectColor);
+    m_program->SetUniform("ambientStrength", m_ambientStrength);
+
+    /*
+     *  Open GL 은 열 우선방식으로, 이론상 나와있는 배열의 형태와 다르게 나타날 수 있다.
+     * 가령 행렬 A:translate 예를 보자
+     * 강의에서는 A03, A13, A23 의 부분이 translate 부분이다.
+     * 하지만 glm::translate 에서는 A30,A31,A32 가 translate 가 된다.
+     */
     m_cameraFront =
         glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraYaw), glm::vec3(0.0f, 1.0f, 0.0f)) *
         glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f)) *

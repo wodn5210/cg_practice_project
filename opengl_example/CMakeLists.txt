@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(PROJECT_NAME imgui_example)
+set(PROJECT_NAME lighting_example)
 set(CMAKE_CXX_STANDARD 17)
 
-set(WINDOW_NAME "Imgui Example")
+set(WINDOW_NAME "Lighting Example")
 set(WINDOW_WIDTH 600)
 set(WINDOW_HEIGHT 600)
 
