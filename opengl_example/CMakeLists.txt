@@ -38,6 +38,10 @@ if(APPLE)
     target_link_libraries(${PROJECT_NAME} PUBLIC "-framework IOKit")
     target_link_libraries(${PROJECT_NAME} PUBLIC "-framework CoreVideo")
     target_link_libraries(${PROJECT_NAME} PUBLIC "-framework CoreFoundation")
+
+    target_compile_definitions(${PROJECT_NAME} PUBLIC
+        APPLE=${APPLE}
+    )    
 else()
 
 endif()
