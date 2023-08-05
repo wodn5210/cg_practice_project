@@ -114,3 +114,30 @@ add_dependencies(imgui ${DEP_LIST})         # dep list 들 먼저 빌드된뒤�
 set(DEP_INCLUDE_DIR ${DEP_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 set(DEP_LIST ${DEP_LIST} imgui)
 set(DEP_LIBS ${DEP_LIBS} imgui)
+
+# assimp
+ExternalProject_Add(
+    dep_assimp
+    GIT_REPOSITORY "https://github.com/assimp/assimp"
+    GIT_TAG "v5.0.1"
+    GIT_SHALLOW 1
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${DEP_INSTALL_DIR}
+        -DBUILD_SHARED_LIBS=OFF
+        -DASSIMP_BUILD_ASSIMP_TOOLS=OFF
+        -DASSIMP_BUILD_TESTS=OFF
+        -DASSIMP_INJECT_DEBUG_POSTFIX=OFF
+        -DASSIMP_BUILD_ZLIB=ON
+    TEST_COMMAND ""
+    )
+set(DEP_LIST ${DEP_LIST} dep_assimp)
+# Macos 에서는 아래 파일명이 다를 수 있어서 수정필요함
+# ex) assimp이렇게 변경?
+#   
+set(DEP_LIBS ${DEP_LIBS}
+    assimp-vc142-mt$<$<CONFIG:Debug>:d>
+    zlibstatic$<$<CONFIG:Debug>:d>
+    IrrXML$<$<CONFIG:Debug>:d>
+    )

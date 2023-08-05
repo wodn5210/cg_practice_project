@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(PROJECT_NAME lighting_example)
+set(PROJECT_NAME object_example)
 set(CMAKE_CXX_STANDARD 17)
 
-set(WINDOW_NAME "Lighting Example")
+set(WINDOW_NAME "Object Example")
 set(WINDOW_WIDTH 600)
 set(WINDOW_HEIGHT 600)
 
@@ -21,7 +21,8 @@ add_executable(${PROJECT_NAME}
     src/buffer.cpp src/buffer.h     
     src/vertex_layout.cpp src/vertex_layout.h   
     src/image.cpp src/image.h            
-    src/texture.cpp src/texture.h              
+    src/texture.cpp src/texture.h       
+    src/mesh.cpp src/mesh.h       
     )
 
 include(dependency.cmake)
