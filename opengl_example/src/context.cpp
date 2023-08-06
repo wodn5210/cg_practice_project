@@ -21,21 +21,10 @@ bool Context::Init() {
     if (!m_program)
         return false;
 
-    auto image = Image::Load("./image/container.jpg");      // 이미지들은 항상 메모리에 들고있을 필요없다. texture 만들면 그만임.
-    if (!image) 
+    m_textureProgram = Program::Create("./shader/texture.vs", "./shader/texture.fs");
+    if (!m_textureProgram)
         return false;
-    SPDLOG_INFO("image: {}x{}, {} channels",
-        image->GetWidth(), image->GetHeight(), image->GetChannelCount());
-	m_texture = Texture::CreateFromImage(image.get());
 
-	auto image2 = Image::Load("./image/awesomeface.png");
-    if (!image2) 
-        return false;
-    SPDLOG_INFO("image2: {}x{}, {} channels",
-        image2->GetWidth(), image2->GetHeight(), image2->GetChannelCount());    
-    m_texture2 = Texture::CreateFromImage(image2.get());
-
-    // 단색이미지
     TexturePtr darkGrayTexture = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)).get());
     TexturePtr grayTexture = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4,glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)).get());
 
@@ -53,6 +42,10 @@ bool Context::Init() {
     m_box2Material->diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
     m_box2Material->specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
     m_box2Material->shininess = 64.0f;
+
+    m_plane = Mesh::CreatePlane();
+    m_windowTexture = Texture::CreateFromImage(Image::Load("./image/blending_transparent_window.png").get());
+
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -161,11 +154,11 @@ void Context::Render() {
     m_box->Draw(m_program.get());
 
 
-    // stencil outline start
-    glEnable(GL_STENCIL_TEST);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);          //stencil실패: 값유지, depth test실패: 값유지, 둘다성공: replace-> 1로세팅
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);                  //Always -> stencil test 는 항상 성공이다. 그려지는부분은 1로세팅
-    glStencilMask(0xFF);
+    // // stencil outline start
+    // glEnable(GL_STENCIL_TEST);
+    // glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);          //stencil실패: 값유지, depth test실패: 값유지, 둘다성공: replace-> 1로세팅
+    // glStencilFunc(GL_ALWAYS, 1, 0xFF);                  //Always -> stencil test 는 항상 성공이다. 그려지는부분은 1로세팅
+    // glStencilMask(0xFF);
 
     // 그림그림
     modelTransform =
@@ -179,20 +172,45 @@ void Context::Render() {
     m_box->Draw(m_program.get());
 
 
-    // 1이 아닌지점만 그린다.
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilMask(0x00);                    //stencil test 통과해도 stencil 버퍼 값 업데이트 안한다.
-    //glDisable(GL_DEPTH_TEST);
-    m_simpleProgram->Use();
-    m_simpleProgram->SetUniform("color", glm::vec4(1.0f, 1.0f, 0.5f, 1.0f));
-    m_simpleProgram->SetUniform("transform", transform *
-                                                 glm::scale(glm::mat4(1.0f), glm::vec3(1.05f, 1.05f, 1.05f)));      // 약간 더 키운다.
-    m_box->Draw(m_simpleProgram.get()); //단색 셰이더
+    // // 1이 아닌지점만 그린다.
+    // glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    // glStencilMask(0x00);                    //stencil test 통과해도 stencil 버퍼 값 업데이트 안한다.
+    // //glDisable(GL_DEPTH_TEST);             // 이거 지워야 제대로되는딩??
+    // m_simpleProgram->Use();
+    // m_simpleProgram->SetUniform("color", glm::vec4(1.0f, 1.0f, 0.5f, 1.0f));
+    // m_simpleProgram->SetUniform("transform", transform *
+    //                                              glm::scale(glm::mat4(1.0f), glm::vec3(1.05f, 1.05f, 1.05f)));      // 약간 더 키운다.
+    // m_box->Draw(m_simpleProgram.get()); //단색 셰이더
 
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilMask(0xFF);
+    // glEnable(GL_DEPTH_TEST);
+    // glDisable(GL_STENCIL_TEST);
+    // glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    // glStencilMask(0xFF);
+
+
+    // Blend
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  //src*alpha + buffer(1-alpha)
+
+    m_textureProgram->Use();
+    glActiveTexture(GL_TEXTURE0);
+    m_windowTexture->Bind();
+    m_textureProgram->SetUniform("tex", 0);
+
+    modelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 4.0f));
+    transform = projection * view * modelTransform;
+    m_textureProgram->SetUniform("transform", transform);
+    m_plane->Draw(m_textureProgram.get());
+
+    modelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.2f, 0.5f, 5.0f));
+    transform = projection * view * modelTransform;
+    m_textureProgram->SetUniform("transform", transform);
+    m_plane->Draw(m_textureProgram.get());
+
+    modelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.4f, 0.5f, 6.0f));
+    transform = projection * view * modelTransform;
+    m_textureProgram->SetUniform("transform", transform);
+    m_plane->Draw(m_textureProgram.get());
 
     glBindVertexArray(0);
     glUseProgram(0);

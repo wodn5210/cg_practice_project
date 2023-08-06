@@ -3,11 +3,11 @@ in vec4 vertexColor;
 in vec2 texCoord;
 out vec4 fragColor;
 
-// 2D texture
 uniform sampler2D tex;
-uniform sampler2D tex2;
 
 void main() {
-    // texture 함수를 통해서 바인딩된 tex 에 접근가능함
-    fragColor = texture(tex, texCoord) * 0.8 + texture(tex2, texCoord) * 0.2;
+    vec4 pixel = texture(tex, texCoord);
+    if (pixel.a < 0.01)
+        discard;
+    fragColor = pixel;
 }
