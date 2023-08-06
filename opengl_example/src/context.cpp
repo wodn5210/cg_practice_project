@@ -35,21 +35,24 @@ bool Context::Init() {
         image2->GetWidth(), image2->GetHeight(), image2->GetChannelCount());    
     m_texture2 = Texture::CreateFromImage(image2.get());
 
-    // m_material.diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
-	// m_material.specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
-    m_material.diffuse = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)).get());
-    m_material.specular = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)).get());
+    // 단색이미지
+    TexturePtr darkGrayTexture = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)).get());
+    TexturePtr grayTexture = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4,glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)).get());
 
+    m_planeMaterial = Material::Create();
+    m_planeMaterial->diffuse = Texture::CreateFromImage(Image::Load("./image/marble.jpg").get());
+    m_planeMaterial->specular = grayTexture;
+    m_planeMaterial->shininess = 128.0f;
 
-    glActiveTexture(GL_TEXTURE0);                       // 사용할 텍스쳐 슬롯 번호 등록
-    glBindTexture(GL_TEXTURE_2D, m_texture->Get());     // 0번 슬롯에는 2D Texture Id m_texture 이다
-    glActiveTexture(GL_TEXTURE1);                       // 사용할 텍스쳐 슬롯 번호 1번으로 변경
-    glBindTexture(GL_TEXTURE_2D, m_texture2->Get());    // 1번 슬롯에는 2D Texture m_texture2 이다
+    m_box1Material = Material::Create();
+    m_box1Material->diffuse = Texture::CreateFromImage(Image::Load("./image/container.jpg").get());
+    m_box1Material->specular = darkGrayTexture;
+    m_box1Material->shininess = 16.0f;
 
-    m_program->Use();
-    m_program->SetUniform("tex", 0);
-    m_program->SetUniform("tex2", 1);
-
+    m_box2Material = Material::Create();
+    m_box2Material->diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
+    m_box2Material->specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
+    m_box2Material->shininess = 64.0f;
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -89,11 +92,6 @@ void Context::Render() {
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("l.specular", glm::value_ptr(m_light.specular));
             ImGui::Checkbox("flash light", &m_flashLightMode);
-        }
-
-        if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            ImGui::DragFloat("m.shininess", &m_material.shininess, 1.0f, 1.0f, 256.0f);
         }
         ImGui::Checkbox("animation", &m_animation);
     }
@@ -142,12 +140,34 @@ void Context::Render() {
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
 
-    m_program->SetUniform("material.diffuse", 0);  
-    m_program->SetUniform("material.specular", 1);        
-    m_program->SetUniform("material.shininess", m_material.shininess);
-  
+    auto modelTransform =
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)) *
+        glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, 10.0f));
+    auto transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_planeMaterial->SetToProgram(m_program.get());
+    m_box->Draw(m_program.get());
 
+    modelTransform =
+        glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.75f, -4.0f)) *
+        glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
+        glm::scale(glm::mat4(1.0f), glm::vec3(1.5f, 1.5f, 1.5f));
+    transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_box1Material->SetToProgram(m_program.get());
+    m_box->Draw(m_program.get());
 
+    modelTransform =
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.75f, 2.0f)) *
+        glm::rotate(glm::mat4(1.0f), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
+        glm::scale(glm::mat4(1.0f), glm::vec3(1.5f, 1.5f, 1.5f));
+    transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_box2Material->SetToProgram(m_program.get());
+    m_box->Draw(m_program.get());
 
     glBindVertexArray(0);
     glUseProgram(0);
