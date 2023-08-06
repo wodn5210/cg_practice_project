@@ -56,4 +56,7 @@ void main() {
     result *= attenuation;
 
     fragColor = vec4(result, 1.0);
+
+    // fs 는 x,y는 픽셀의 좌표, z는 0~1사이 normal 값
+   // fragColor = vec4(vec3(gl_FragCoord.z), 1.0);
 }
