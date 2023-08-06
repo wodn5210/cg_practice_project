@@ -43,7 +43,7 @@ bool Framebuffer::InitWithColorAttachment(const TexturePtr colorAttachment)
                            colorAttachment->Get(), 0);
 
     // 위에 Color Buffer 만들었으니, Depth, Stencil Buffer 만들자
-    // texture 로 만들진 않고 바로 Render Buffer 로 만들것
+    // depth,stencil buffer는 texture 로 만들진 않고 바로 Render Buffer 로 만들것
     glGenRenderbuffers(1, &m_depthStencilBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthStencilBuffer);
 

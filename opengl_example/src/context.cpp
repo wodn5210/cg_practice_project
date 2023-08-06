@@ -93,6 +93,10 @@ void Context::Render() {
             ImGui::Checkbox("flash light", &m_flashLightMode);
         }
         ImGui::Checkbox("animation", &m_animation);
+
+        float aspectRatio = (float)m_width / (float)m_height;
+        ImGui::Image((ImTextureID)m_framebuffer->GetColorAttachment()->Get(), 
+                        ImVec2(150*aspectRatio, 150));
     }
     ImGui::End();
 
@@ -234,9 +238,10 @@ void Context::Render() {
     m_postProgram->Use();
     m_postProgram->SetUniform("transform", glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
     m_postProgram->SetUniform("gamma", m_gamma);
-    
+
     // framebuffer 안에있는 texture 바인딩
     m_framebuffer->GetColorAttachment()->Bind();
+    glActiveTexture(GL_TEXTURE0);
     m_postProgram->SetUniform("tex", 0);
     m_plane->Draw(m_postProgram.get());
 
