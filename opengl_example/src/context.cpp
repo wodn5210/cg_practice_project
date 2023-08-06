@@ -160,6 +160,14 @@ void Context::Render() {
     m_box1Material->SetToProgram(m_program.get());
     m_box->Draw(m_program.get());
 
+
+    // stencil outline start
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);          //stencil실패: 값유지, depth test실패: 값유지, 둘다성공: replace-> 1로세팅
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);                  //Always -> stencil test 는 항상 성공이다. 그려지는부분은 1로세팅
+    glStencilMask(0xFF);
+
+    // 그림그림
     modelTransform =
         glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.75f, 2.0f)) *
         glm::rotate(glm::mat4(1.0f), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
@@ -169,6 +177,22 @@ void Context::Render() {
     m_program->SetUniform("modelTransform", modelTransform);
     m_box2Material->SetToProgram(m_program.get());
     m_box->Draw(m_program.get());
+
+
+    // 1이 아닌지점만 그린다.
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);                    //stencil test 통과해도 stencil 버퍼 값 업데이트 안한다.
+    //glDisable(GL_DEPTH_TEST);
+    m_simpleProgram->Use();
+    m_simpleProgram->SetUniform("color", glm::vec4(1.0f, 1.0f, 0.5f, 1.0f));
+    m_simpleProgram->SetUniform("transform", transform *
+                                                 glm::scale(glm::mat4(1.0f), glm::vec3(1.05f, 1.05f, 1.05f)));      // 약간 더 키운다.
+    m_box->Draw(m_simpleProgram.get()); //단색 셰이더
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
 
     glBindVertexArray(0);
     glUseProgram(0);

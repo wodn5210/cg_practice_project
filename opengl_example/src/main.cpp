@@ -146,7 +146,7 @@ int main()
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   
 
         glfwPollEvents();   // 이벤트 수집 ex) 창움직이기, 마우스, 키보드 ...
         // 화면크기 변경 감지된거 확인하고 OnFramebufferSizeChange함수 불림
