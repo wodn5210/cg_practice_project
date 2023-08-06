@@ -53,15 +53,38 @@ void Texture::SetTextureFromImage(const Image* image) {
         case 2: format = GL_RG; break;
         case 3: format = GL_RGB; break;
     }
-    
-    // A없는 이미지로 사용하면 그냥 255로 채워짐
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-        image->GetWidth(), image->GetHeight(), 0,
-        format, GL_UNSIGNED_BYTE,
-        image->GetData());
 
+    m_width = image->GetWidth();
+    m_height = image->GetHeight();
+    m_format = format;
+
+    // A없는 이미지로 사용하면 그냥 255로 채워짐
+    glTexImage2D(GL_TEXTURE_2D, 0, m_format,
+                 m_width, m_height, 0,
+                 format, GL_UNSIGNED_BYTE,
+                 image->GetData());
 
     // minmap 알아서 생성해준다.
     glGenerateMipmap(GL_TEXTURE_2D);        
 }
 
+
+
+TextureUPtr Texture::Create(int width, int height, uint32_t format) {
+    auto texture = TextureUPtr(new Texture());
+    texture->CreateTexture();
+    texture->SetTextureFormat(width, height, format);
+    texture->SetFilter(GL_LINEAR, GL_LINEAR);
+    return std::move(texture);
+}
+
+void Texture::SetTextureFormat(int width, int height, uint32_t format) {
+    m_width = width;
+    m_height = height;
+    m_format = format;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, m_format,
+                 m_width, m_height, 0,
+                 m_format, GL_UNSIGNED_BYTE,
+                 nullptr);                      // texture 가 저장될 데이터공간만 확보. 어떤 데이터가 들어가진 않음
+}

@@ -90,6 +90,11 @@ void Context::Render() {
     }
     ImGui::End();
 
+    // 장면을 그리기전에 생성한 buffer binding
+    // 우리가 만든 buffer에 그림을 그리기 시작한다. (화면에 나타나는 buffer가 아님)
+    m_framebuffer->Bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   
+    glEnable(GL_DEPTH_TEST);
 
     /*
      *  Open GL 은 열 우선방식으로, 이론상 나와있는 배열의 형태와 다르게 나타날 수 있다.
@@ -212,6 +217,25 @@ void Context::Render() {
     m_textureProgram->SetUniform("transform", transform);
     m_plane->Draw(m_textureProgram.get());
 
+
+
+    // default 화면으로 그림그려질 대상을 변경함 (출력되는 화면으로 전환한다는 말임)
+    Framebuffer::BindToDefault();
+    // 그화면도 clear
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    // texture program 활성화
+    m_textureProgram->Use();
+    m_textureProgram->SetUniform("transform", glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
+
+    // framebuffer 안에있는 texture 바인딩
+    m_framebuffer->GetColorAttachment()->Bind();
+    m_textureProgram->SetUniform("tex", 0);
+    m_plane->Draw(m_textureProgram.get());
+
+
+
+
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -243,6 +267,9 @@ void Context::Reshape(int width, int height) {
     m_height = height;
 
     glViewport(0, 0, m_width, m_height);
+
+    // 화면크기와 동일한 크기의 buffer 생성
+	m_framebuffer = Framebuffer::Create(Texture::Create(width, height, GL_RGBA));
 }
 
 void Context::MouseMove(double x, double y)
