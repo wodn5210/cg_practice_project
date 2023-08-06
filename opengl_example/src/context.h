@@ -28,7 +28,6 @@ private:
     ProgramUPtr m_simpleProgram;
 
     MeshUPtr m_box;
-   	ModelUPtr m_model;
 	TextureUPtr m_texture;
     TextureUPtr m_texture2;
 

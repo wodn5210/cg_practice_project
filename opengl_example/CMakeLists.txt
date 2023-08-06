@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(PROJECT_NAME object_example)
+set(PROJECT_NAME advanced_feature_example)
 set(CMAKE_CXX_STANDARD 17)
 
-set(WINDOW_NAME "Object Example")
+set(WINDOW_NAME "Advanced_Feature Example")
 set(WINDOW_WIDTH 600)
 set(WINDOW_HEIGHT 600)
 

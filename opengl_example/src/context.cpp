@@ -11,9 +11,6 @@ ContextUPtr Context::Create() {
 }
 
 bool Context::Init() { 
-    m_model = Model::Load("./model/backpack.obj");
-    if (!m_model)
-        return false;    
     m_box = Mesh::CreateBox();    
 
     m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
@@ -145,21 +142,12 @@ void Context::Render() {
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
 
+    m_program->SetUniform("material.diffuse", 0);  
+    m_program->SetUniform("material.specular", 1);        
     m_program->SetUniform("material.shininess", m_material.shininess);
-    
-    m_program->SetUniform("material.diffuse", 0);    
-    glActiveTexture(GL_TEXTURE0);
-    m_material.diffuse->Bind();
-    
-    m_program->SetUniform("material.specular", 1);    
-    glActiveTexture(GL_TEXTURE1);
-    m_material.specular->Bind();
+  
 
-    auto modelTransform = glm::mat4(1.0f);
-    auto transform = projection * view * modelTransform;
-    m_program->SetUniform("transform", transform);
-    m_program->SetUniform("modelTransform", modelTransform);
-	m_model->Draw(m_program.get());
+
 
     glBindVertexArray(0);
     glUseProgram(0);
