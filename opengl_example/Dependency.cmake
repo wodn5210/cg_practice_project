@@ -136,8 +136,16 @@ set(DEP_LIST ${DEP_LIST} dep_assimp)
 # Macos 에서는 아래 파일명이 다를 수 있어서 수정필요함
 # ex) assimp이렇게 변경?
 #   
-set(DEP_LIBS ${DEP_LIBS}
-    assimp-vc142-mt$<$<CONFIG:Debug>:d>
-    zlibstatic$<$<CONFIG:Debug>:d>
-    IrrXML$<$<CONFIG:Debug>:d>
-    )
+if(APPLE)
+    set(DEP_LIBS ${DEP_LIBS}
+        assimp
+        zlibstatic
+        IrrXML
+        )
+else()
+    set(DEP_LIBS ${DEP_LIBS}
+        assimp-vc142-mt$<$<CONFIG:Debug>:d>
+        zlibstatic$<$<CONFIG:Debug>:d>
+        IrrXML$<$<CONFIG:Debug>:d>
+        )
+endif()
