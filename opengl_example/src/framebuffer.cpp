@@ -16,7 +16,7 @@ Framebuffer::~Framebuffer()
     }
     if (m_framebuffer)
     {
-        glDeleteFramebuffers(1, &m_framebuffer);
+        glDeleteFramebuffers(1, &m_framebuffer); 
     }
 }
 

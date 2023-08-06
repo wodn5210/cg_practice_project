@@ -25,6 +25,11 @@ bool Context::Init() {
     if (!m_textureProgram)
         return false;
 
+    //m_postProgram = Program::Create("./shader/texture.vs", "./shader/invert.fs");
+    m_postProgram = Program::Create("./shader/texture.vs", "./shader/gamma.fs");
+    if (!m_postProgram)
+        return false;
+
     TexturePtr darkGrayTexture = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)).get());
     TexturePtr grayTexture = Texture::CreateFromImage(Image::CreateSingleColorImage(4, 4,glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)).get());
 
@@ -63,6 +68,7 @@ void Context::Render() {
             // Clear Color 색 변경
             glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
         }
+        ImGui::DragFloat("gamma", &m_gamma, 0.01f, 0.0f, 2.0f);
         ImGui::Separator();
         ImGui::DragFloat3("camera pos", glm::value_ptr(m_cameraPos), 0.01f);        // 맨끝에는 speed
         ImGui::DragFloat("camera yaw", &m_cameraYaw, 0.5f);                         // 맨끝에는 speed
@@ -225,13 +231,14 @@ void Context::Render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // texture program 활성화
-    m_textureProgram->Use();
-    m_textureProgram->SetUniform("transform", glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
-
+    m_postProgram->Use();
+    m_postProgram->SetUniform("transform", glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
+    m_postProgram->SetUniform("gamma", m_gamma);
+    
     // framebuffer 안에있는 texture 바인딩
     m_framebuffer->GetColorAttachment()->Bind();
-    m_textureProgram->SetUniform("tex", 0);
-    m_plane->Draw(m_textureProgram.get());
+    m_postProgram->SetUniform("tex", 0);
+    m_plane->Draw(m_postProgram.get());
 
 
 
